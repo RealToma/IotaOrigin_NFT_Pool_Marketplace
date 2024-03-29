@@ -1,0 +1,18 @@
+{
+    "collections": [
+        {
+            "id": 1,
+            "symbol": "ITM",
+            "name": "GameItem",
+            "address": "0x71b1d06391612C3B5282d4b3901C5B25Eac5D188",
+            "image": ""
+        },
+        {
+            "id": 2,
+            "symbol": "ITM2",
+            "name": "GameItem2",
+            "address": "0x71b1d06391612C3B5282d4b3901C5B25Eac5D189",
+            "image": ""
+        }
+    ]
+}
