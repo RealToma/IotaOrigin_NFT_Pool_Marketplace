@@ -54,26 +54,32 @@ export const useCollectionInfo = (collectionAddress: string, token: string) => {
           (pair: any) =>
             (pair.token?.id ?? constants.AddressZero) == token.toLowerCase()
         )) {
-            const pairContract = new Contract(
-              pair.id,
-              POOL_ABI,
-              signer ?? provider
-            );
-            const nftQuoteBuy = await pairContract.getBuyNFTQuote(1,1);
-            const nftQuoteSell = await pairContract.getSellNFTQuote(1,1);
+          const pairContract = new Contract(
+            pair.id,
+            POOL_ABI,
+            signer ?? provider
+          );
+          const nftQuoteBuy = await pairContract.getBuyNFTQuote(1, 1);
+          const nftQuoteSell = await pairContract.getSellNFTQuote(1, 1);
           let objectDataEachPool: any = {
             address: pair.id,
             poolType: pair.type,
-            buyPrice: formatUnits(nftQuoteBuy.inputAmount, paymentToken.decimals),
-            sellPrice: formatUnits(nftQuoteSell.outputAmount, paymentToken.decimals),
-//             buyPrice:
-//               pair.type == '1'
-//                 ? undefined
-//                 : +formatUnits(pair.spotPrice, paymentToken.decimals),
-//             sellPrice:
-//               pair.type == '0'
-//                 ? undefined
-//                 : +formatUnits(pair.spotPrice, paymentToken.decimals),
+            buyPrice: formatUnits(
+              nftQuoteBuy.inputAmount,
+              paymentToken.decimals
+            ),
+            sellPrice: formatUnits(
+              nftQuoteSell.outputAmount,
+              paymentToken.decimals
+            ),
+            //             buyPrice:
+            //               pair.type == '1'
+            //                 ? undefined
+            //                 : +formatUnits(pair.spotPrice, paymentToken.decimals),
+            //             sellPrice:
+            //               pair.type == '0'
+            //                 ? undefined
+            //                 : +formatUnits(pair.spotPrice, paymentToken.decimals),
             spotPrice: +formatUnits(pair.spotPrice, paymentToken.decimals),
             tokenIds: pair.asAccount.nfts.map((item: any) => item.identifier),
             tokenBalance: +formatUnits(pair.balance, paymentToken.decimals),
@@ -100,17 +106,21 @@ export const useCollectionInfo = (collectionAddress: string, token: string) => {
     pools.forEach((x, i) => {
       if (x.poolType != '0' && x.tokenIds.length > 0) {
         _allNftIDs = _allNftIDs.concat(x.tokenIds);
-          _floorPrice = _floorPrice? Math.min(x.buyPrice, _floorPrice) : x.buyPrice ;
+        _floorPrice = _floorPrice
+          ? Math.min(x.buyPrice, _floorPrice)
+          : x.buyPrice;
       }
       if (x.poolType != '1' && x.tokenBalance >= x.sellPrice) {
-          _bestOffer = _bestOffer? Math.max(x.sellPrice, _bestOffer) : x.sellPrice ;
+        _bestOffer = _bestOffer
+          ? Math.max(x.sellPrice, _bestOffer)
+          : x.sellPrice;
       }
       _totalVolume += x.volume;
     });
 
     setAllNftIds(_allNftIDs);
     setFloorPrice(_floorPrice);
-    setBestOffer(_bestOffer ? _bestOffer: undefined);
+    setBestOffer(_bestOffer ? _bestOffer : undefined);
     setTotalVolume(_totalVolume);
   }, [pools]);
 

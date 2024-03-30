@@ -56,7 +56,6 @@ export const useCollectionIcon = (collectionAddress: string | undefined) => {
     if (!data?.nfts || !data?.nfts?.length) {
       return;
     }
-
     (async () => {
       if (!data?.nfts?.length || !collectionAddress) {
         return;
@@ -65,11 +64,19 @@ export const useCollectionIcon = (collectionAddress: string | undefined) => {
       try {
         const contract = new Contract(collectionAddress, erc721ABI, provider);
         const uri = await contract.tokenURI(data?.nfts[0]?.identifier);
-        const metadataUri = uri.replace('ipfs://', IPFS_GATEWAY)+(IPFS_GATEWAY_TOKEN!=="" && uri.includes('ipfs://')?"?pinataGatewayToken="+IPFS_GATEWAY_TOKEN:"");
+        const metadataUri =
+          uri.replace('ipfs://', IPFS_GATEWAY) +
+          (IPFS_GATEWAY_TOKEN !== '' && uri.includes('ipfs://')
+            ? '?pinataGatewayToken=' + IPFS_GATEWAY_TOKEN
+            : '');
         const metadata = await fetch(metadataUri).then(res => res.json());
 
-        let assetUri = metadata?.image?.replace('ipfs://', IPFS_GATEWAY)+(IPFS_GATEWAY_TOKEN!=="" && metadata?.image?.includes('ipfs://')?"?img-width=50&pinataGatewayToken="+IPFS_GATEWAY_TOKEN:"?img-width=50");
-        
+        let assetUri =
+          metadata?.image?.replace('ipfs://', IPFS_GATEWAY) +
+          (IPFS_GATEWAY_TOKEN !== '' && metadata?.image?.includes('ipfs://')
+            ? '?img-width=50&pinataGatewayToken=' + IPFS_GATEWAY_TOKEN
+            : '?img-width=50');
+
         const response = await fetch(assetUri);
         const buffer = await response.arrayBuffer();
         var uint8View = new Uint8Array(buffer);

@@ -47,17 +47,19 @@ const Dashboard: NextPage = () => {
         <div className='flex flex-col items-center w-full h-[80vh]'>
           <div className='grid flex-1 w-full grid-cols-1 gap-5 md:grid-cols-2'>
             <div className='relative'>
-              <div className='w-full h-full absolute left-0 top-0 -z-10'>
+              <div className='w-full h-full absolute left-0 top-0 -z-10 rounded-lg overflow-hidden'>
                 <Image
                   src='/images/landing-left.png'
-                  layout='fill'
-                  objectFit='cover'
+                  // layout='fill'
+                  // objectFit='cover'
+                  fill={true}
+                  loading='lazy'
                   alt='banner'
                 />
               </div>
               <Link
                 href='/Collections'
-                className='w-full h-full relative p-5 flex flex-col justify-center items-center border border-slate-600 rounded-lg hover:border-[#1fcec1] cursor-pointer overflow-hidden bg-[rgba(0, 0, 0, 0.3)] backdrop-blur-lg'
+                className='w-full h-full relative p-5 flex flex-col justify-center items-center border border-slate-600 rounded-lg hover:border-[#1fcec1]  hover:text-[#1fcec1] cursor-pointer overflow-hidden bg-[rgba(0, 0, 0, 0.3)] backdrop-blur-lg transition duration-300 ease-in-out'
               >
                 <h1 className='w-full my-6 text-4xl lg:text-6xl xl:text-8xl text-center'>
                   NFT Pool Marketplace
@@ -65,17 +67,19 @@ const Dashboard: NextPage = () => {
               </Link>
             </div>
             <div className='relative'>
-              <div className='w-full h-full absolute left-0 top-0 -z-10'>
+              <div className='w-full h-full absolute left-0 top-0 -z-10  rounded-lg overflow-hidden'>
                 <Image
                   src='/images/landing-right.png'
-                  layout='fill'
-                  objectFit='cover'
+                  // layout='fill'
+                  // objectFit='cover'
+                  fill={true}
+                  loading='lazy'
                   alt='banner'
                 />
               </div>
               <Link
                 href={LAUNCHPAD_URL}
-                className='w-full h-full p-5 flex flex-col justify-center items-center border border-slate-600 rounded-lg hover:border-[#1fcec1] cursor-pointer bg-[rgba(0, 0, 0, 0.1)] backdrop-blur-lg'
+                className='w-full h-full p-5 flex flex-col justify-center items-center border border-slate-600 rounded-lg hover:border-[#1fcec1]  hover:text-[#1fcec1] cursor-pointer bg-[rgba(0, 0, 0, 0.1)] backdrop-blur-lg transition duration-300 ease-in-out'
               >
                 <h1 className='w-full my-6 text-4xl lg:text-6xl xl:text-8xl text-center'>
                   SMR NFT Launchpad
@@ -83,9 +87,19 @@ const Dashboard: NextPage = () => {
               </Link>
             </div>
           </div>
-          <div style={{margin: '20px'}}>
-            <a href="https://docs.google.com/document/d/1X9moTUXWMbSQN5x97hyRvNccbu0WNhFUMPYSv7A7SSY/edit?usp=sharing" style={{position: 'absolute',left: '50px',fontSize: '10px'}}><p>Terms and conditions</p></a>
-            <a href="https://docs.google.com/document/d/1iUg_N45jwsXZ9S1xYN1ceS-xmd5DPh2CludZsmgBz5Y/edit?usp=sharing" style={{position: 'absolute',left: '245px',fontSize: '10px'}}><p >Privacy Policy</p></a>
+          <div style={{ margin: '20px' }}>
+            <a
+              href='https://docs.google.com/document/d/1X9moTUXWMbSQN5x97hyRvNccbu0WNhFUMPYSv7A7SSY/edit?usp=sharing'
+              style={{ position: 'absolute', left: '50px', fontSize: '10px' }}
+            >
+              <p>Terms and conditions</p>
+            </a>
+            <a
+              href='https://docs.google.com/document/d/1iUg_N45jwsXZ9S1xYN1ceS-xmd5DPh2CludZsmgBz5Y/edit?usp=sharing'
+              style={{ position: 'absolute', left: '245px', fontSize: '10px' }}
+            >
+              <p>Privacy Policy</p>
+            </a>
           </div>
         </div>
       </div>

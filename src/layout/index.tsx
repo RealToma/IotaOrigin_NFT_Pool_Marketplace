@@ -1,9 +1,10 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import styled from 'styled-components';
 import { Box } from '@mui/material';
 import { BackgroundGradient } from './BackgroundGradient';
 import Head from 'next/head';
+import { useGetAllCollectionAssets } from '@/hooks/useGetCollection';
 
 const Header = dynamic(() => import('./Header'), {
   ssr: false,
@@ -14,6 +15,7 @@ type Props = {
 };
 
 export function Layout({ children }: Props) {
+  // useGetAllCollectionAssets();
   return (
     <>
       <Head>

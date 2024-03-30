@@ -31,7 +31,6 @@ import { tokens } from '@/constants';
 const VaultDetail: NextPage = () => {
   const router = useRouter();
   const { address: id } = router.query;
-
   const { address } = useAccount();
   const { data: signer } = useSigner();
 

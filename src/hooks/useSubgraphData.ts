@@ -32,6 +32,7 @@ export const useSubgraphData = (
         const response = await (
           subgraphClient as ApolloClient<NormalizedCacheObject>
         ).query({ query: query, variables });
+
         setData(response.data);
       } catch (err) {
         console.log(err);

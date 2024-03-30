@@ -34,13 +34,16 @@ const NFTWallet: FC<Props> = ({ collection, setSelected }) => {
     if (!data) {
       return;
     }
-
     (async () => {
       const nfts: NFTData[] = [];
       for (const item of data?.account?.nfts ?? []) {
         const contract = new Contract(item.contract.id, erc721ABI, provider);
         const uri = await contract.tokenURI(item.identifier);
-        const metadataUri = uri.replace('ipfs://', IPFS_GATEWAY)+(IPFS_GATEWAY_TOKEN!=="" && uri.includes('ipfs://')?"?pinataGatewayToken="+IPFS_GATEWAY_TOKEN:"");
+        const metadataUri =
+          uri.replace('ipfs://', IPFS_GATEWAY) +
+          (IPFS_GATEWAY_TOKEN !== '' && uri.includes('ipfs://')
+            ? '?pinataGatewayToken=' + IPFS_GATEWAY_TOKEN
+            : '');
         const tokenId = item.identifier;
 
         try {
@@ -48,7 +51,11 @@ const NFTWallet: FC<Props> = ({ collection, setSelected }) => {
           nfts.push({
             address: collection ?? item.contract.id,
             tokenId,
-            imageUrl: metadata?.image?.replace('ipfs://', IPFS_GATEWAY)+(IPFS_GATEWAY_TOKEN!=="" && metadata?.image?.includes('ipfs://')?"?pinataGatewayToken="+IPFS_GATEWAY_TOKEN:""),
+            imageUrl:
+              metadata?.image?.replace('ipfs://', IPFS_GATEWAY) +
+              (IPFS_GATEWAY_TOKEN !== '' && metadata?.image?.includes('ipfs://')
+                ? '?pinataGatewayToken=' + IPFS_GATEWAY_TOKEN
+                : ''),
           });
 
           setNfts([...nfts]);

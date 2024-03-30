@@ -4,7 +4,10 @@ import { useEffect, useState, useContext, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { Box } from '@mui/material';
 import { useCollectionIcon } from '@/hooks/useCollectionIcon';
-import { GET_ALL_COLLECTIONS } from '@/constants/subgraphQueries';
+import {
+  GET_ALL_COLLECTIONS,
+  GET_COLLECTION_DEFAULT_IMAGE,
+} from '@/constants/subgraphQueries';
 import { formatUnits } from 'ethers/lib/utils.js';
 import Head from 'next/head';
 import { FaExclamationCircle, FaQuestion, FaTimes } from 'react-icons/fa';
@@ -12,51 +15,37 @@ import { FaArrowDownLong, FaArrowUpLong } from 'react-icons/fa6';
 import ChainContext from '@/contexts/ChainContext';
 import { ApolloClient, NormalizedCacheObject } from 'apollo-boost';
 import { useTokenPriceContext } from '@/contexts/TokenPriceContext';
-import { constants } from 'ethers';
+import { Contract, constants } from 'ethers';
 import { formatNumberWithUnit } from '@/utils';
 import { useRouter } from 'next/router';
-import { tokens } from '@/constants';
+import { IPFS_GATEWAY, IPFS_GATEWAY_TOKEN, tokens } from '@/constants';
 import cx from 'classnames';
 import LoadingEffectMain from '@/components/Loading/LoadingEffectMain';
 import { Skeleton } from '@mui/material';
 import { StatsContext } from '@/contexts/StatsContext';
-import { useNetwork, useProvider } from 'wagmi';
+import { erc721ABI, useNetwork, useProvider } from 'wagmi';
+import filetype from 'magic-bytes.js';
 
-let stringAllCollection: any = undefined;
-let dataAllCollection: any = undefined;
-if (typeof window !== 'undefined' && window.localStorage) {
-  stringAllCollection = localStorage.getItem('arrayAllCollection');
-  dataAllCollection = JSON.parse(stringAllCollection);
-}
-
-const CollectionRow = ({ collection, collectionAsset }: any) => {
+const CollectionRow = ({ collection }: any) => {
   const router = useRouter();
   const [imageLoaded, setImageLoaded] = useState(-1);
   const handleImageLoad = (val: any) => {
     setImageLoaded(val);
   };
 
-  const { image: imgUri, type: imgType }: any = useCollectionIcon(
+  const { image: imageUri, type: imageType }: any = useCollectionIcon(
     collection.id
   );
 
-  // console.log('collectionAsset:', collectionAsset);
-
-  const imageUri =
-    collectionAsset === undefined || collectionAsset === null
-      ? imgUri
-      : collectionAsset.imageUri;
-
-  const imageType =
-    collectionAsset === undefined || collectionAsset === null
-      ? imgType
-      : collectionAsset.imageType;
-
-  // const objectArrayString: any = localStorage.getItem('arrayAllCollection');
-  // const objectArray = JSON.parse(objectArrayString);
-  // console.log('objectArray:', objectArray);
+  const { setEachCollection }: any = useContext(StatsContext);
 
   const handleSetCollectionInfo = () => {
+    // collection.imageUri = imageUri;
+    // collection.imageType = imageType;
+    // console.log('collection:', collection);
+
+    // setEachCollection(collection);
+
     router.push({
       pathname: `/collection/${collection.id}`,
     });
@@ -157,8 +146,6 @@ type SortOption = 'name' | 'market' | 'price' | 'volume' | 'listings';
 
 export default function Collections() {
   const { chain } = useNetwork();
-
-  // console.log('objectArray:', dataAllCollection);
 
   const router = useRouter();
   const provider = useProvider();
@@ -293,6 +280,103 @@ export default function Collections() {
     [sortDirect, sortOption]
   );
 
+  // const fetchCollectionIcon = async (collectionAddress: any) => {
+  //   try {
+  //     // console.log('collectionAddress:', collectionAddress);
+  //     const variables = {
+  //       collectionAddress: collectionAddress?.toLowerCase(),
+  //     };
+  //     // console.log('variables:', variables);
+
+  //     const responseCollectionImage: any = await (
+  //       subgraphClient as ApolloClient<NormalizedCacheObject>
+  //     ).query({
+  //       query: GET_COLLECTION_DEFAULT_IMAGE,
+  //       variables,
+  //     });
+
+  //     // console.log('responseCollectionImage:', responseCollectionImage);
+  //     let data: any = responseCollectionImage.data;
+
+  //     // console.log('data:', data);
+  //     if (!data?.nfts || !data?.nfts?.length) {
+  //       return;
+  //     }
+
+  //     if (!data?.nfts?.length || !collectionAddress) {
+  //       return;
+  //     }
+
+  //     const contract = new Contract(collectionAddress, erc721ABI, provider);
+  //     const uri = await contract.tokenURI(data?.nfts[0]?.identifier);
+
+  //     // console.log('uri:', uri);
+  //     const metadataUri =
+  //       uri.replace('ipfs://', IPFS_GATEWAY) +
+  //       (IPFS_GATEWAY_TOKEN !== '' && uri.includes('ipfs://')
+  //         ? '?pinataGatewayToken=' + IPFS_GATEWAY_TOKEN
+  //         : '');
+
+  //     const metadata = await fetch(metadataUri)
+  //       .then(res => res.json())
+  //       .catch(err => {
+  //         return undefined;
+  //       });
+
+  //     let assetUri =
+  //       metadata?.image?.replace('ipfs://', IPFS_GATEWAY) +
+  //       (IPFS_GATEWAY_TOKEN !== '' && metadata?.image?.includes('ipfs://')
+  //         ? '?img-width=50&pinataGatewayToken=' + IPFS_GATEWAY_TOKEN
+  //         : '?img-width=50');
+
+  //     // console.log('assetUri:', assetUri);
+
+  //     const responseAssetURI: any = await fetch(assetUri).catch(err => {
+  //       return undefined;
+  //     });
+
+  //     console.log('responseAssetURI:', responseAssetURI);
+
+  //     // console.log('responseAssetURI:', responseAssetURI);
+  //     const buffer = await responseAssetURI.arrayBuffer();
+
+  //     var uint8View = new Uint8Array(buffer);
+  //     const type = filetype(uint8View);
+  //     console.log('type:', type);
+  //     // const { typename } = type[0];
+  //     return [assetUri, 'png'];
+
+  //     // try {
+  //     //   const metadata: any = await (await fetch(metadataUri)).json();
+  //     //   let assetUri =
+  //     //     metadata?.image?.replace('ipfs://', IPFS_GATEWAY) +
+  //     //     (IPFS_GATEWAY_TOKEN !== '' && metadata?.image?.includes('ipfs://')
+  //     //       ? '?img-width=50&pinataGatewayToken=' + IPFS_GATEWAY_TOKEN
+  //     //       : '?img-width=50');
+
+  //     //   // console.log('assetUri:', assetUri);
+
+  //     //   const responseAssetURI = await fetch(assetUri);
+
+  //     //   // console.log('responseAssetURI:', responseAssetURI);
+  //     //   const buffer = await responseAssetURI.arrayBuffer();
+
+  //     //   var uint8View = new Uint8Array(buffer);
+  //     //   const type = filetype(uint8View);
+  //     //   const { typename } = type[0];
+  //     //   return [assetUri, typename];
+  //     //   // Proceed with the code that follows after successful retrieval of metadata
+  //     // } catch (error) {
+  //     //   console.error('An error occurred:', error);
+  //     //   return [undefined, undefined];
+  //     //   // Add code here to handle the error or skip to the next block of code
+  //     // }
+  //     // return ['', ''];
+  //   } catch (error) {
+  //     console.log('error of fetchCollectionIcon:', error);
+  //   }
+  // };
+
   const fetchCollections = useCallback(async () => {
     if (isLoadedAll || Object.keys(priceData).length == 0) {
       return;
@@ -310,10 +394,105 @@ export default function Collections() {
         },
       });
 
+      // let tempResponse = await getAllCollection(
+      //   provider,
+      //   chain,
+      //   token,
+      //   priceData
+      // );
+      // setLawCollections(tempResponse);
+      // console.log('tempResponse:', response);
+
       if (response?.data?.collections?.length < 10) {
         setIsLoadedAll(true);
       }
 
+      // setLawCollections([
+      //   ...lawCollections,
+      //   ...(response?.data?.collections ?? []),
+      // ]);
+      // setOffset(offset + limit);
+
+      // console.log('response?.data?.collections:', response?.data?.collections);
+      // const arrayCollectionInfo: any = [];
+      // await Promise.all(
+      //   response?.data?.collections.map(async (collection: any, index: any) => {
+      //     const pairs = (collection.pairs ?? []).filter(
+      //       (pair: any) =>
+      //         !paymentToken?.address ||
+      //         (pair.token?.id ?? constants.AddressZero) ==
+      //           paymentToken.address.toLowerCase()
+      //     );
+
+      //     // console.log("pairs:", pairs)
+      //     const totalVolume = pairs.reduce((prev: number, pair: any) => {
+      //       const pairToken = tokens.filter(
+      //         item => item.address.toLowerCase() == pair?.token?.id
+      //       )[0];
+      //       return (
+      //         prev +
+      //         parseFloat(formatUnits(pair.volume, pairToken?.decimals ?? 18)) *
+      //           priceData[pair?.token?.id]
+      //       );
+      //     }, 0);
+
+      //     // console.log("totalVolume:", totalVolume)
+      //     const listings = pairs.reduce(
+      //       (prev: number, pair: any) => prev + parseInt(pair.numNfts),
+      //       0
+      //     );
+
+      //     // console.log("listings:", listings)
+      //     let bestOffer = undefined;
+      //     let floorPrice = undefined;
+      //     for (const pair of pairs) {
+      //       const pairToken = tokens.filter(
+      //         item => item.address.toLowerCase() == pair?.token?.id
+      //       )[0];
+      //       const pairPrice =
+      //         +formatUnits(pair.spotPrice, pairToken?.decimals ?? 18) *
+      //         priceData[pair.token?.id ?? constants.AddressZero];
+      //       const tokenBalance = +formatUnits(
+      //         pair.balance ?? '0',
+      //         pairToken?.decimals ?? 18
+      //       );
+      //       if (pair.type != '1') {
+      //         if (!bestOffer) {
+      //           bestOffer = pairPrice;
+      //         } else if (pairPrice > bestOffer) {
+      //           bestOffer = pairPrice;
+      //         }
+      //       }
+      //       if (pair.type != '0' && tokenBalance >= pairPrice) {
+      //         if (!floorPrice) {
+      //           floorPrice = pairPrice;
+      //         } else if (pairPrice < floorPrice) {
+      //           floorPrice = pairPrice;
+      //         }
+      //       }
+      //     }
+
+      //     // const [imageUri, imageType]: any = await fetchCollectionIcon(
+      //     //   collection.id
+      //     // );
+
+      //     let eachCollectionData = {
+      //       id: collection.id,
+      //       name: collection.name,
+      //       // imageUri: imageUri,
+      //       // imageType: imageType,
+      //       symbol: collection.symbol,
+      //       volume: totalVolume,
+      //       listings: listings,
+      //       bestOffer,
+      //       floorPrice: floorPrice ? floorPrice * 1.1 : undefined,
+      //     };
+
+      //     arrayCollectionInfo.push(eachCollectionData);
+      //   })
+      // );
+
+      // console.log('arrayCollectionInfo:', arrayCollectionInfo);
       setLawCollections(response?.data?.collections);
     } catch (err) {
       console.log('error of fetching collection:', err);
@@ -321,10 +500,36 @@ export default function Collections() {
       setIsLoading(false);
     }
   }, [isLoadedAll, priceData, setLawCollections, subgraphClient]);
-
   useEffect(() => {
     fetchCollections();
   }, [fetchCollections]);
+
+  // useEffect(() => {
+  //   console.log('isLoading:', isLoading);
+  // });
+
+  // const handleScroll = useCallback(() => {
+  //   if (
+  //     window.innerHeight + document.documentElement.scrollTop !==
+  //       document.documentElement.offsetHeight ||
+  //     isLoading ||
+  //     isLoadedAll
+  //   ) {
+  //     return;
+  //   }
+  //   fetchCollections();
+  // }, [fetchCollections, isLoading, isLoadedAll]);
+
+  // useEffect(() => {
+  //   if (typeof window == 'undefined') {
+  //     return;
+  //   }
+  //   window.addEventListener('scroll', handleScroll, { passive: true });
+
+  //   return () => {
+  //     window.removeEventListener('scroll', handleScroll);
+  //   };
+  // }, [handleScroll]);
 
   return (
     <>
@@ -492,9 +697,6 @@ export default function Collections() {
                       <CollectionRow
                         key={collection.id}
                         collection={collection}
-                        collectionAsset={dataAllCollection?.find(
-                          (obj: { id: any }) => obj.id === collection.id
-                        )}
                       />
                     ))}
                     {/* {isLoading && (
