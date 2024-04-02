@@ -1,0 +1,45 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+
+
+# vercel
+.vercel
+.env
+# typescript
+*.tsbuildinfo
+
+package-lock.json
+yarn.json
+yarn.lock
+
+#ide
+.idea
+
+#For project, should be updated manually for different networks
+src/constants/reward_tokens_shimmer_testnet.json
+src/constants/reward_tokens_celo_alfajores.json
