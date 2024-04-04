@@ -87,6 +87,7 @@ export const useCollectionInfo = (collectionAddress: string, token: string) => {
           };
 
           dataPools.push(objectDataEachPool);
+          setPools([...dataPools]);
         }
 
         setPools([...dataPools]);

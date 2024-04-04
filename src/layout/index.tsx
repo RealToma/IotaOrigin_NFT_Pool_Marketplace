@@ -15,7 +15,7 @@ type Props = {
 };
 
 export function Layout({ children }: Props) {
-  // useGetAllCollectionAssets();
+  useGetAllCollectionAssets();
   return (
     <>
       <Head>
