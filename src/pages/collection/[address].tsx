@@ -39,24 +39,8 @@ export default function CollectionDetail() {
   );
   const collection: string | undefined = router.query.address as string;
 
-  console.log('collection:', collection);
-  let stringAllCollection: any = undefined;
-  let dataAllCollection: any = undefined;
-  if (typeof window !== 'undefined' && window.localStorage) {
-    stringAllCollection = localStorage.getItem('arrayAllCollection');
-    dataAllCollection = JSON.parse(stringAllCollection);
-  }
-
-  let collectionAsset = dataAllCollection?.find(
-    (obj: { id: any }) => obj.id === collection
-  );
-
-  // console.log('collectionAsset:', collectionAsset);
-
   const { image, type: imageType } = useCollectionIcon(collection);
   const collectionInfo = useCollectionInfo(collection, paymentToken.address);
-
-  console.log('collectionInfo:', collectionInfo);
 
   const { data: signer } = useSigner();
   const provider = useProvider();
@@ -69,6 +53,7 @@ export default function CollectionDetail() {
   const [isSelling, setIsSelling] = useState<boolean>(false);
   const [isBuying, setIsBuying] = useState<boolean>(false);
   const [totalPrice, setTotalPrice] = useState<BigNumber>(BigNumber.from(0));
+  const [listings, setListings] = useState<number>(0);
 
   const variables = useMemo(
     () => ({
@@ -80,8 +65,11 @@ export default function CollectionDetail() {
 
   const nftsData = useSubgraphData(GET_NFTS_IN_COLLECTION_WITH_IDS, variables);
 
+//  console.log("collectionInfo ",collectionInfo)
+//  console.log("nfts ",nfts);
+
   const NFTDisplayList = useMemo(() => {
-    return nfts ? (
+    return nfts?.length>0 ? (
       <NFTDisplay
         nfts={nfts}
         setSelected={tokenIds =>
@@ -89,9 +77,22 @@ export default function CollectionDetail() {
             nfts.filter((nft: NFTData) => tokenIds.includes(nft.tokenId))
           )
         }
+        template={false}
+        number={listings}
       />
-    ) : null;
-  }, [nfts]);
+    ) : 
+    (
+      <NFTDisplay
+        nfts={nfts}
+        number={listings}
+        template={true}
+      />)
+  }, [nfts, listings]);
+
+  useEffect(()=> {
+    setListings(collectionInfo.allNftIDs.length);
+    console.log(listings);
+  },[collectionInfo])
 
   useEffect(() => {
     const calculateTotalPrice = async () => {
@@ -337,11 +338,7 @@ export default function CollectionDetail() {
     const contract = new Contract(collection, erc721ABI, provider);
     for (const item of nftsData?.nfts ?? []) {
       const uri = await contract.tokenURI(item.identifier);
-      const metadataUri =
-        uri.replace('ipfs://', IPFS_GATEWAY) +
-        (IPFS_GATEWAY_TOKEN !== '' && uri.includes('ipfs://')
-          ? '?pinataGatewayToken=' + IPFS_GATEWAY_TOKEN
-          : '');
+      const metadataUri = uri.replace('ipfs://', IPFS_GATEWAY)+(IPFS_GATEWAY_TOKEN!=="" && uri.includes('ipfs://')?"?pinataGatewayToken="+IPFS_GATEWAY_TOKEN:"");
       const tokenId = item.identifier;
 
       if (collectionInfo.allNftIDs.indexOf(tokenId + '') < 0) {
@@ -372,11 +369,7 @@ export default function CollectionDetail() {
         nfts.push({
           address: collection ?? item.contract.id,
           tokenId,
-          imageUrl:
-            metadata?.image?.replace('ipfs://', IPFS_GATEWAY) +
-            (IPFS_GATEWAY_TOKEN !== '' && metadata?.image?.includes('ipfs://')
-              ? '?pinataGatewayToken=' + IPFS_GATEWAY_TOKEN
-              : ''),
+          imageUrl: metadata?.image?.replace('ipfs://', IPFS_GATEWAY)+(IPFS_GATEWAY_TOKEN!=="" && metadata?.image?.includes('ipfs://')?"?pinataGatewayToken="+IPFS_GATEWAY_TOKEN:""),
           price,
           priceUsd,
           pool: poolAddress,
@@ -397,9 +390,9 @@ export default function CollectionDetail() {
     priceData,
     provider,
   ]);
-
+  
   useEffect(() => {
-    const timer = setTimeout(() => updateNfts(), 100);
+    const timer = setTimeout(() => updateNfts(), 1000);
 
     return () => clearTimeout(timer);
   }, [updateNfts]);
@@ -409,6 +402,7 @@ export default function CollectionDetail() {
       <Head>
         <title>Snip Pool | Collection Details</title>
       </Head>
+      <div style={{display:"none"}}>{listings}</div>
       <ul className='w-full gap-2 flex flex-wrap text-sm font-medium text-center text-gray-400 py-12 md:py-0'>
         {tokens.map(item => (
           <button
@@ -435,29 +429,29 @@ export default function CollectionDetail() {
         ))}
       </ul>
       <div className='text-center bg-white/5 -mx-5 -mt-[50px] py-8 md:mt-0 md:py-0 md:-mx-[50px]'>
-        {collectionAsset?.imageType == 'mp4' ? (
+        {imageType == 'mp4' ? (
           <video
             className='w-[100px] rounded-md mx-auto my-2'
             autoPlay
             loop
-            src={collectionAsset?.imageUri}
+            src={image}
           />
         ) : (
           <img
             className='w-[100px] rounded-md mx-auto my-2'
-            src={collectionAsset?.imageUri}
+            src={image}
             alt='Collection Icon'
           />
         )}
         <h1 className='mb-6 text-3xl font-bold text-white md:text-4xl'>
-          {collectionAsset?.name} ({collectionAsset?.symbol})
+          {collectionInfo.name} ({collectionInfo.symbol})
         </h1>
         <div className='hidden text-3xl text-white md:block'>{collection}</div>
         <div className='text-base text-white md:hidden'>
           {shortenAddress(collection)}
         </div>
         <div className='grid grid-cols-1 md:grid-cols-5 mt-5 w-full max-w-[300px] md:max-w-[1000px] mx-auto'>
-          <LabeledValue value={collectionAsset?.symbol} label='Ticker' />
+          <LabeledValue value={collectionInfo.symbol} label='Ticker' />
           <LabeledValue
             value={
               collectionInfo.floorPrice != undefined

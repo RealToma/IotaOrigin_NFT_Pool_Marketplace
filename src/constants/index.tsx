@@ -30,7 +30,7 @@ export const projectId = process.env.NEXT_PUBLIC_WALLECTCONNECT_PROJECTID!;
 //     address: '0x795474E6A6BbeF02C018A06B684Cb149e4525819',
 //     symbol: 'AUR',
 //     name: 'Aurous',
-//     icon: 'aur.png',
+//     icon: 'aur.webp',
 //   },
 // ];
 export const tokens: PaymentToken[] = [
@@ -46,7 +46,7 @@ export const tokens: PaymentToken[] = [
     address: '0x174d211F46994860500DB4d66B3EFE605A82BF95',
     symbol: 'AUR',
     name: 'Aureus',
-    icon: 'aur.png',
+    icon: 'aur.webp',
     priceFeed: '0x174d211f46994860500db4d66b3efe605a82bf95',
     decimals: 18,
   },

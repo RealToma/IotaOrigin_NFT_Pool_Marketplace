@@ -21,13 +21,13 @@ const NFT = ({
   paymentToken,
 }: {
   image: string | undefined;
-  collection: string | undefined;
+  collection?: string | undefined;
   tokenId: string;
   price: number | undefined;
   priceUsd: number | undefined;
   onClick?: Function;
   selected: boolean;
-  paymentToken?: PaymentToken;
+  paymentToken?: PaymentToken | undefined;
 }) => {
   return (
     <div
@@ -78,12 +78,17 @@ const NFT = ({
 export default function NFTDisplay({
   nfts,
   setSelected,
+  template, // Existing template with a default value of false
+  number, // Added number without a default value
 }: {
   nfts?: NFTData[];
   setSelected?: (value: any[]) => void;
+  template?: boolean; // Existing template type
+  number: number; // Specify the type of the number variable as number
 }) {
   let [selected, setSelectedLocal] = useState<string[]>([]);
-
+  console.log("NFTDisplay ", number, template)
+  console.log("nfts ",nfts)
   useEffect(() => {
     if (setSelected) {
       setSelected(selected);
@@ -93,9 +98,7 @@ export default function NFTDisplay({
   const toggleSelection = (tokenId: string) => {
     if (setSelected) {
       if (selected.includes(tokenId)) {
-        setSelectedLocal(
-          selected.filter((tokenId2: string) => tokenId2 !== tokenId)
-        );
+        setSelectedLocal(selected.filter((tokenId2: string) => tokenId2 !== tokenId));
       } else {
         setSelectedLocal([tokenId, ...selected]);
       }
@@ -104,21 +107,36 @@ export default function NFTDisplay({
 
   return (
     <div className='grid grid-cols-2 text-white md:grid-cols-4 xl:grid-cols-6'>
-      {nfts
-        ? nfts.map((nft, index) => (
-            <NFT
-              price={nft.price}
-              priceUsd={nft.priceUsd}
-              tokenId={nft.tokenId}
-              collection={nft.address}
-              image={nft.imageUrl}
-              key={index}
-              onClick={() => toggleSelection(nft.tokenId)}
-              selected={selected.includes(nft.tokenId)}
-              paymentToken={nft.paymentToken}
-            />
-          ))
-        : 'loading ...'}
+      
+      {template?Array.from({ length: number }).map((_, index) => {
+          console.log("Number for div: ", index); // Add this console log statement
+          return (
+              // Assuming you have a placeholder or mock NFT component for the template
+              <NFT
+                  price={0}
+                  priceUsd={0}
+                  tokenId={"---"}
+                  image={"/images/template.png"}
+                  key={index}
+                  onClick={() => toggleSelection("1")}
+                  selected={selected.includes("4")}
+              />
+          );
+      }):nfts
+      ? nfts.map((nft, index) => (
+          <NFT
+            price={nft.price}
+            priceUsd={nft.priceUsd}
+            tokenId={nft.tokenId}
+            collection={nft.address}
+            image={nft.imageUrl}
+            key={index}
+            onClick={() => toggleSelection(nft.tokenId)}
+            selected={selected.includes(nft.tokenId)}
+            paymentToken={nft.paymentToken}
+          />
+        ))
+      : 'loading ...'}
     </div>
   );
 }
